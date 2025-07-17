@@ -59,4 +59,4 @@ workflows:
       - build-jekyll
       - deploy:
           requires:
-            - build-node
+            - build-jekyll
