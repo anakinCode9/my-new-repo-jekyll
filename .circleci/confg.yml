@@ -1,23 +1,37 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5
+  ruby: circleci/ruby@2.1.0
 
 jobs:
-  build-node:
-    executor: node/default
+  build-jekyll:
+    docker:
+      - image: cimg/ruby:3.2-node
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: npm
+
       - run:
-          name: Build project
-          command: npm run build
+          name: Init submodules
+          command: git submodule update --init --recursive
+
+      - run:
+          name: Install Bundler
+          command: gem install bundler
+
+      - run:
+          name: Install Ruby gems
+          command: bundle install
+
+      - run:
+          name: Build Jekyll site
+          command: bundle exec jekyll build
+
       - run:
           name: Copy build artifacts
           command: |
             mkdir -p ~/artifacts
-            cp -R out/* ~/artifacts
+            cp -R _site/* ~/artifacts
+
       - persist_to_workspace:
           root: ~/artifacts
           paths:
@@ -49,11 +63,10 @@ jobs:
           command: |
             aws s3 sync ~/artifacts s3://circleci-bucket-x/ --delete --region eu-north-1
 
-
 workflows:
   build-and-deploy:
     jobs:
-      - build-node
+      - build-jekyll
       - deploy:
           requires:
-            - build-node
+            - build-jekyll
