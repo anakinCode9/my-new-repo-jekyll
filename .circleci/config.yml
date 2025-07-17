@@ -56,7 +56,7 @@ jobs:
 workflows:
   build-and-deploy:
     jobs:
-      - build-node
+      - build-jekyll
       - deploy:
           requires:
             - build-node
