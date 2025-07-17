@@ -9,20 +9,29 @@ jobs:
       - image: cimg/ruby:3.2-node
     steps:
       - checkout
+
+      - run:
+          name: Init submodules
+          command: git submodule update --init --recursive
+
       - run:
           name: Install Bundler
           command: gem install bundler
+
       - run:
-          name: Install dependencies
+          name: Install Ruby gems
           command: bundle install
+
       - run:
           name: Build Jekyll site
           command: bundle exec jekyll build
+
       - run:
           name: Copy build artifacts
           command: |
             mkdir -p ~/artifacts
             cp -R _site/* ~/artifacts
+
       - persist_to_workspace:
           root: ~/artifacts
           paths:
